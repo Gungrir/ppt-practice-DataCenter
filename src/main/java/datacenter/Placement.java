@@ -1,6 +1,7 @@
 package datacenter;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Placement {
@@ -25,8 +26,11 @@ public class Placement {
      *  @return cost
      */
     public int getCost() {
-        // TODO: Implement this
-        return -1;
+        int cost = 0;
+        for(Processor processor : processors) {
+            cost += processor.getPeakMemoryUsage();
+        }
+        return cost;
     }
 
     /**
@@ -36,8 +40,11 @@ public class Placement {
      * (no processors or no jobs on any processor)
      */
     public int getMakeSpan() {
-        // TODO: Implement this
-        return -1;
+        int makespan = 0;
+        for(Processor processor : processors) {
+            makespan = Math.max(makespan, processor.getTotalComputationTime());
+        }
+        return makespan;
     }
 
     /** Check if this placement is equal to another given placement
@@ -49,7 +56,11 @@ public class Placement {
      * (order of processors does matter)
      * */
     public boolean equals(Placement that) {
-        // TODO: Implement this
+        if(this.processors.size() == that.processors.size()) {
+            if(this.processors.equals(that.processors)) {
+                return true;
+            }
+        }
         return false;
     }
 
@@ -58,8 +69,17 @@ public class Placement {
      * @return the mean flow time, and return 0 if there is no work (no processors or no jobs on any processor)
      */
     public double getMeanFlowTime() {
-        // TODO: Implement this method
-        return -1;
+        double totalFlowTime = 0.0;
+        double totalJobs = 0.0;
+        for(Processor processor : processors) {
+            int time=0;
+            for(Job job : processor.getJobs()) {
+                time += job.getExecutionTime();
+                totalFlowTime += time;
+                totalJobs++;
+            }
+        }
+        return totalFlowTime /totalJobs;
     }
 
     /** Obtain the median flow time for this placement
@@ -67,8 +87,23 @@ public class Placement {
      * @return the median flow time, and return 0 if there is no work (no processors or no jobs on any processors)
      */
     public double getMedianFlowTime() {
-        // TODO: Implement this method
-        return -1;
+        double medianFlowTime = 0.0;
+        List<Integer> flowTimes = new ArrayList<>();
+        for(Processor processor : processors) {
+            int time=0;
+            for(Job job : processor.getJobs()) {
+                time += job.getExecutionTime();
+                flowTimes.add(time);
+            }
+        }
+        Collections.sort(flowTimes);
+        if(flowTimes.size() % 2 == 1) {
+            medianFlowTime = flowTimes.get(flowTimes.size()/2);
+        }
+        else{
+            medianFlowTime = (flowTimes.get(flowTimes.size()/2) + flowTimes.get(flowTimes.size()/2 + 1))/2.0;
+        }
+        return medianFlowTime;
     }
 
 }

@@ -33,7 +33,14 @@ public class Processor {
      * @return true if adding the job does not exceed the time limit on this processor, and false otherwise.
      */
     public boolean canFitJob(Job job) {
-        // TODO: Implement this
+        int sumoftime = 0;
+        for(Job assignedJob : jobs) {
+            sumoftime += assignedJob.getExecutionTime();
+        }
+
+        if((timeLimit - sumoftime) >= job.getExecutionTime()) {
+            return true;
+        }
         return false;
     }
 
@@ -43,8 +50,11 @@ public class Processor {
      * @return true if the job can fit on this processor and was assigned, and false otherwise
      */
     public boolean addJob(Job job) {
-        // TODO: Implement this
-        return true;
+        if(canFitJob(job)) {
+            jobs.add(job);
+            return true;
+        }
+        return false;
     }
 
     /** Get the peak memory usage of this processor
@@ -52,8 +62,12 @@ public class Processor {
      * @return the peak memory usage of the jobs ossigned to this processor
      * */
     public int getPeakMemoryUsage() {
-        // TODO: Implement this
-        return -1;
+        int maxMemory = 0;
+        for(Job job : jobs) {
+            maxMemory = Math.max(maxMemory, job.getMemoryUsage());
+        }
+
+        return maxMemory;
     }
 
     /** Get the total computation (execution) time of this processor
@@ -62,8 +76,11 @@ public class Processor {
      * to this processor
      */
     public int getTotalComputationTime() {
-        // TODO: Implement this
-        return -1;
+        int totalComputationTime = 0;
+        for(Job job : jobs) {
+            totalComputationTime += job.getExecutionTime();
+        }
+        return totalComputationTime;
     }
 
     /** Check if this processor is equal to a given processor
@@ -72,7 +89,11 @@ public class Processor {
      * in the same order, and they have the same time limit
      */
     public boolean equals(Processor that) {
-        // TODO: Implement this
+        if(this.timeLimit == that.timeLimit) {
+            if(this.jobs.equals(that.jobs)) {
+                return true;
+            }
+        }
         return false;
     }
 
@@ -89,7 +110,19 @@ public class Processor {
      * @return the jobs scheduled on this processor, in scheduled order
      */
     public Job[] getJobs() {
-        // TODO: Implement this method
-        return new Job[0];
+        Job[] executingJobs = new Job[jobs.size()];
+        List<Job> unvisitedjob = new ArrayList<>(jobs);
+        for(int i = 0; i < jobs.size(); i++) {
+            int executionTime = Integer.MAX_VALUE;
+            for(Job job : unvisitedjob) {
+                if(job.getExecutionTime() < executionTime) {
+                    executionTime = job.getExecutionTime();
+                    executingJobs[i] = job;
+                }
+            }
+            unvisitedjob.remove(executingJobs[i]);
+        }
+
+        return executingJobs;
     }
 }
